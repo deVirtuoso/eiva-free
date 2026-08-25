@@ -1,0 +1,10 @@
+# This folder ships on its own, so it carries its own rules. EIVA is a
+# Windows product: everything here is CRLF in the working tree - eiva.cmd and
+# eiva.vbs especially, since Windows itself reads those and a bare LF in a
+# batch file breaks it in ways that are hard to see.
+* text=auto eol=crlf
+
+# Rendered artwork and binaries: never converted, never diffed as text.
+*.png binary
+*.ico binary
+*.exe binary

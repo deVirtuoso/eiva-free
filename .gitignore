@@ -1,5 +1,6 @@
 # machine-local, never shared
 settings.json
+models.json
 eiva.log
 __pycache__/
 *.pyc

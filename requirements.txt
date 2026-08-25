@@ -1,8 +1,14 @@
 # EIVA - Free edition
 #
-# The whole free edition needs three things: the Claude client, screen capture,
-# and Python's own tkinter (which ships with Python on Windows). No audio, no
-# GPU, no speech models - those are the Pro edition.
+# Screen capture, tkinter (which ships with Python on Windows), and a client
+# library for each of the three providers that can answer what is captured.
+#
+# All three go in, though you need a key for only one. They are small pure
+# HTTP clients, and installing them together is what makes switching provider
+# a menu choice rather than another trip through setup. No audio, no GPU, no
+# speech models - those are the Pro edition.
 
-anthropic>=0.122          # the model
+anthropic>=0.122          # Claude
+openai>=1.60              # GPT
+google-genai>=0.5.0       # Gemini
 pillow>=10                # screen capture
