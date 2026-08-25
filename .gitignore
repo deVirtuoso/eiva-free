@@ -1,0 +1,6 @@
+# machine-local, never shared
+settings.json
+eiva.log
+__pycache__/
+*.pyc
+.venv/
