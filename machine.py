@@ -55,13 +55,21 @@ def _machine_guid():
 
 
 def _volume_serial():
-    """A secondary signal: the C: volume serial number. Folded in so that a
-    cloned machine that somehow shares a GUID still differs."""
+    """A secondary signal: the system drive's volume serial number. Folded in
+    so that a cloned machine that somehow shares a GUID still differs."""
     try:
+        # Not a literal "C:\\". Windows can be installed on another drive, and
+        # there the call simply fails - it does not raise - leaving vol at 0,
+        # so every such machine would fold in the same constant and quietly
+        # lose the second signal. %SystemDrive% is C: on almost every machine,
+        # so this is the same code as before for almost every licence already
+        # issued, and a real serial rather than nothing on the rest.
+        root = os.environ.get("SystemDrive", "C:").rstrip("\\") + "\\"
         vol = ctypes.c_uint()
-        ctypes.windll.kernel32.GetVolumeInformationW(
-            ctypes.c_wchar_p("C:\\"), None, 0, ctypes.byref(vol),
-            None, None, None, 0)
+        if not ctypes.windll.kernel32.GetVolumeInformationW(
+                ctypes.c_wchar_p(root), None, 0, ctypes.byref(vol),
+                None, None, None, 0):
+            return ""
         return str(vol.value)
     except Exception:
         return ""

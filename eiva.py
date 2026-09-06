@@ -582,6 +582,31 @@ def work_area(root):
     return root.winfo_screenwidth(), root.winfo_screenheight() - 48
 
 
+def reachable(where, w, h):
+    """Is a window put back at `where` somewhere the mouse can still find it?
+
+    A position is saved from whatever display the window was last closed on,
+    and that display is not always there next time. Unplug a second monitor
+    and a saved +2717+365 puts the whole window past the right edge of the
+    only screen left, where the app is running, answering its hotkey, and
+    completely invisible - which reads as a program that failed to start.
+    So a position is honoured only while enough of the title bar lands on
+    some monitor to grab and drag; anything else is dropped and the window
+    opens where the window manager puts it.
+    """
+    # Only the plain +X+Y that winfo_geometry writes (its offsets can be
+    # negative, as +-100+50). A hand-typed -X-Y measures from the far edge,
+    # which is by definition on a screen, so leave it be.
+    spot = re.match(r"^\+(-?\d+)\+(-?\d+)$", str(where or ""))
+    if not spot:
+        return True
+    x, y = int(spot[1]), int(spot[2])
+    vx, vy, vw, vh = virtual_screen()
+    GRAB_W, GRAB_H = 120, 30   # A strip of title bar wide enough to hit.
+    return (x + w > vx + GRAB_W and x < vx + vw - GRAB_W
+            and vy <= y <= vy + vh - GRAB_H)
+
+
 def fit_window(root, saved, roomy=0):
     """Size the window so that every control fits, then honour what was saved.
 
@@ -609,7 +634,9 @@ def fit_window(root, saved, roomy=0):
     if was:
         want_w = min(max(int(was[1]), need_w), limit_w)
         want_h = min(max(int(was[2]), need_h), limit_h)
-        where = was[3]
+        # A saved size is clamped above; a saved position that no longer
+        # lands on a screen is discarded rather than clamped.
+        where = was[3] if reachable(was[3], want_w, want_h) else ""
     root.geometry(f"{want_w}x{want_h}{where}")
     # Goes to eiva.log when there is no console. It is the first thing to look
     # at when someone says the window came up the wrong size on their machine.
